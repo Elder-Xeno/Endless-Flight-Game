@@ -1,0 +1,7 @@
+As a game I want to create a fun and straight forward gaming experience, for people of all ages to play casually.
+On the main screen there should be a "Play" button that can be clicked to start the game.
+As a game I want the player character to be able to move up and down in order to avoid obstacles.
+As a game mechanic, I want there to be collision detection so that when a player runs into an obstacle,
+they trigger a "Game Over".
+As a feature I want a point system to be displayed on screen which increases for time spent in game
+and logs top a high score, to give a sense of accomplishment and a challenge for future plays.
