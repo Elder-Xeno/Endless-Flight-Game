@@ -1,0 +1,17 @@
+body {
+    margin: 0;
+    background: whitesmoke;
+    overflow: hidden;
+}
+
+#gameContainer {
+    display: flex;
+    align-items:start;
+    justify-content: start;
+    height: 100vh;
+}
+
+canvas {
+    display: block;
+    background: grey;
+}
