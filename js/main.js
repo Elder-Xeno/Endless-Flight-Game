@@ -13,6 +13,8 @@ const player = {
     speed: 10,
 };
 
+const obstacles = [];
+const obstacleTypes = ["obstacle1", "obstacle2", "obstacle3"];
 
 let score = 0;
 
@@ -58,10 +60,11 @@ canvas.addEventListener('mousedown', function(e) {
 })
 
 function drawPlayer(){
-    // Draw the player on the canvas
+// Clear the canvas using method clearRect() Updates player position
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Draw the player on the canvas
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
-    console.log("player")
 };
 
 //function drawObstacles()
@@ -77,9 +80,9 @@ function handleKeyPress(key, isPressed){
 
 function updatePlayer(){
 // Update the player's position and check for collisions with obstacles
-    if (movingUp){
+    if (movingUp && player.y - player.height / 2 > 0){
         player.y -= player.speed;
-    }else if (movingDown){
+    }else if (movingDown && player.y + player.height / 2 < canvas.height){
         player.y += player.speed;
     }
 };
@@ -87,17 +90,17 @@ function updatePlayer(){
 //function updateObstacles()
 // Update the obstacles' positions, create new obstacles, and check for collisions
 
-function init(){
-
-}
-
 function render(){
-
     drawPlayer();
     updatePlayer();
+//method tells the browser that I want to perform an animation. Makes animation smoother.
     requestAnimationFrame(render)
 };
 
 
+function init(){
+    render();
+};
+
+
 init();
-render();
