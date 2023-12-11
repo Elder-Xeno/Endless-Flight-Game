@@ -1,5 +1,4 @@
 /*----- constants -----*/
-
 // constants of player, obstacles, score counter, game canvas
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -7,8 +6,8 @@ const ctx = canvas.getContext("2d");
 const player = {
   x: 0, // left and right
   y: canvas.height / 2, // top and bottom
-  width: 101, // width and height are the size of the player
-  height: 51,
+  width: 100, // width and height are the size of the player
+  height: 50,
   color: "red",
   speed: 10,
 };
@@ -16,22 +15,31 @@ const player = {
 const obstacleMid = {
   x: canvas.width,
   y: canvas.height / 2,
-  width: 60,
-  height: 60,
+  width: 90,
+  height: 80,
   color: "blue",
   speed: 10,
 };
 
 const obstacleTop = {
   x: canvas.width,
-  y: 0,
+  y: 100,
   width: 100,
   height: 300,
   color: "green",
-  speed: 3,
+  speed: 8,
 };
 
-const obstacles = [obstacleMid, obstacleTop];
+const obstacleBottom = {
+  x: canvas.width,
+  y: canvas.height,
+  width: 200,
+  height: 300,
+  color: "purple",
+  speed: 7,
+};
+
+const obstacles = [obstacleMid, obstacleTop, obstacleBottom];
 
 let score = 0;
 
@@ -45,11 +53,7 @@ let movingUp = false;
 let movingDown = false;
 
 let frameCounter = 0; // this will increment once per frame in the game loop to spawn obstacles and control their frequency.
-const spawnFrequency = 250;
-
-// position, size, and speed of player and obstacles
-// obstacle creation rate
-// how the score accumulates
+const spawnFrequency = 2000;
 
 /*----- cached elements  -----*/
 
@@ -84,6 +88,7 @@ function init() {
 }
 
 function render() {
+  clearCanvas();
   drawPlayer();
   updatePlayer();
   drawObstacle();
@@ -93,8 +98,7 @@ function render() {
 }
 
 function drawPlayer() {
-  // Clear the canvas using method clearRect() Updates player position
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  clearCanvas();
   // Draw the player on the canvas
   ctx.fillStyle = player.color;
   ctx.fillRect(
@@ -126,26 +130,30 @@ function updateObstacle() {
     if (obs.x + obs.width / 2 < 0) {
       obs.x = canvas.width + obs.width / 2;
       // Adjusts the height at which the obstacle will respawn
-      obs.y = Math.random() * (canvas.height - obs.height) + obs.height / 2;
+      obs.y = getRandomPosition(obs);
     }
   });
 
   // Increase the frame counter
   frameCounter++;
 
-   // Adjust the spawn frequency based on player speed
-   const adjustedSpawnFrequency =
-   spawnFrequency * (player.speed / 10);
+  // Adjust the spawn frequency based on player speed
+  const adjustedSpawnFrequency = spawnFrequency * (player.speed / 10);
 
-  // Spawn a new obstacle every spawnFrequency frames
- if (frameCounter % adjustedSpawnFrequency === 0) {
-    obstacles.push({
-      ...obstacleTop,
-      x: canvas.width,
-      y: 0, // Always spawn from the top
-    });
+  // Spawn a new obstacle every spawnFrequency frame
+  if (frameCounter % adjustedSpawnFrequency === 0) {
+    const randomObstacle = Math.floor(Math.random() * obstacles.length);
+    const newObstacle = {
+      ...obstacles[randomObstacle],
+      x: canvas.width, //Set the x coordinate of the new obstacle to the right edge of the canvas
+      y: getRandomPosition(obstacles[randomObstacle]),
+    };
+
+    // Check if there is enough space between new obstacle and existing obstacles
+    if (checkSpace(newObstacle, 200)) {
+      obstacles.push(newObstacle);
+    }
   }
-
 
   // Reset frame counter to avoid large numbers
   if (frameCounter > 1000) {
@@ -158,11 +166,36 @@ function updateObstacle() {
     // Reset player position
     player.x = 0;
     player.y = canvas.height / 2;
+
     // Reset obstacles position
     obstacles.forEach((obs) => {
       obs.x = canvas.width;
     });
   }
+}
+function getRandomPosition(obstacle) {
+  // Return Y position based on obstacle type
+  if (obstacle === obstacleTop) {
+    return 0;
+  } else if (obstacle === obstacleMid) {
+    return canvas.height / 2;
+  } else if (obstacle === obstacleBottom) {
+    return canvas.height;
+  }
+}
+
+function checkSpace(newObstacle, minSpace) {
+  // Check if there is enough space between new obstacle and existing obstacles
+  for (const obs of obstacles) {
+    if (
+      Math.floor(newObstacle.y - obs.y) < minSpace &&
+      newObstacle.x < obs.x + obs.width &&
+      newObstacle.x + newObstacle.width > obs.x
+    ) {
+      return false; // Not enough space
+    }
+  }
+  return true; // Enough space
 }
 
 function handleKeyPress(key, isPressed) {
@@ -192,7 +225,7 @@ function checkCollision() {
       // Check if the top side of the player is less than or equal to the bottom side of the obstacle.
       player.y - player.height / 2.5 <= obs.y + obs.height / 2.5
     ) {
-      // Adjust player position to avoid clipping through the obstacleTop
+      // Adjust player position to avoid clipping through the obstacle
       player.y = obs.y + obs.height / 2.5 + player.height / 2.5;
       return true; // Collision detected with any obstacle
     }
@@ -200,7 +233,11 @@ function checkCollision() {
   return false; // No collision with any obstacle
 }
 
+function clearCanvas() {
+  // Clear the canvas using method clearRect() Updates player position
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 // function drawScore()
 // Update and display the current score on the canvas
 
-init();
+// init();
