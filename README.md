@@ -6,6 +6,7 @@
 The game is similar to Flappy Bird but instead of physics to keep the player afloat, the game requires the use of either "W" & "D", or "upArrow" & "downArrow" keys, in order to move the player up and down.
 
 ##Screenshot(s)
+
 Screenshot(s): Images of your actual game.
 
 ## Technologies Used
