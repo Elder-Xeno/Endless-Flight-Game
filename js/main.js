@@ -3,6 +3,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const restartContainer = document.getElementById("gameOverScreen");
+const restartButton = document.getElementById("restartButton");
+
 const player = {
   x: 0, // left and right
   y: canvas.height / 2, // top and bottom
@@ -70,6 +73,8 @@ document.addEventListener("keyup", function (evt) {
   handleKeyPress(evt.key, false);
 });
 // keypress listener for keys that allow up and down movement for the player.
+
+restartButton.addEventListener("click", restartGame);
 
 /*----- functions -----*/
 
@@ -141,7 +146,7 @@ function updateObstacle() {
   // Increase the frame counter
   frameCounter++;
   timer++;
-  
+
       // Check if its time to speed up the game
       if (timer % 120 === 0){
         obstacles.forEach((obs) => {
@@ -261,6 +266,29 @@ function drawScore() {
   ctx.font = "20px 'Press Start 2P', cursive";
   ctx.fillText(`Score: ${score}`, 20, 30);
   ctx.fillStyle = "white";
+}
+
+function restartGame(){
+  //show game over screen with restart button
+  gameOverScreen.removeAttribute("hidden");
+
+  //reset player
+  player.x = 0;
+  player.y = canvas.height / 2;
+
+  //reset obstacles
+  obstacles.forEach((obs)=> {
+    obs.x = canvas.width;
+    obs.speed = obstacles.speed;
+  });
+
+  //reset game variables
+  timer = 0;
+  score = 0;
+  frameCounter = 0;
+
+  clearCanvas();
+  render();
 }
 
 init();
