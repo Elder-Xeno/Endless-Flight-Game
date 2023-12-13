@@ -11,10 +11,10 @@ Screenshot(s): Images of your actual game.
 
 ## Technologies Used
 
-- **HTML5:**
-- **CSS3:**
-- **JavaScript:**
-- **Canvas API:**
+- **HTML5**
+- **CSS3**
+- **JavaScript**
+- **Canvas API**
 
 Getting Started: In this section include the link to your deployed game and any instructions you deem important.
 
