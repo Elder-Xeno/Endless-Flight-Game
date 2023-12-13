@@ -18,7 +18,7 @@ const obstacleMid = {
   width: 100,
   height: 90,
   color: "blue",
-  speed: 3,
+  speed: 6,
 };
 
 const obstacleTop = {
@@ -33,8 +33,8 @@ const obstacleTop = {
 const obstacleBottom = {
   x: canvas.width,
   y: canvas.height,
-  width: 220,
-  height: 200,
+  width: 200,
+  height: 230,
   color: "purple",
   speed: 5,
 };
@@ -134,16 +134,19 @@ function updateObstacle() {
       obs.x = canvas.width + obs.width / 2;
       // Adjusts the height at which the obstacle will respawn
       obs.y = getRandomPosition(obs);
+      
     }
   });
 
   // Increase the frame counter
   frameCounter++;
   timer++;
-
-  // Increase the player's score based on time
-  score = Math.floor(timer / 60);
-
+  
+      // Check if its time to speed up the game
+      if (timer % 120 === 0){
+        obstacles.forEach((obs) => {
+          obs.speed += 1;
+        })};
   // Adjust the spawn frequency based on player speed
   const adjustedSpawnFrequency = spawnFrequency * (player.speed / 10);
 
@@ -166,7 +169,7 @@ function updateObstacle() {
     }
   }
   // Reset frame counter to avoid large numbers
-  if (frameCounter > 1000) {
+  if (frameCounter > 2000) {
     frameCounter = 0;
   }
 
@@ -191,7 +194,7 @@ function getRandomPosition(obstacle) {
   } else if (obstacle === obstacleMid) {
     return (
       canvas.height / 3 + Math.random() * (canvas.height / 2 - obstacle.height)
-    );
+    )
   } else if (obstacle === obstacleBottom) {
     return canvas.height;
   }
@@ -218,7 +221,7 @@ function handleKeyPress(key, isPressed) {
 }
 
 function updatePlayer() {
-  // Update the player's position and check for collisions with obstacles
+  // Update the player's position
   if (movingUp && player.y - player.height / 2 > 0) {
     player.y -= player.speed;
   } else if (movingDown && player.y + player.height / 2 < canvas.height) {
@@ -231,16 +234,16 @@ function checkCollision() {
   for (const obs of obstacles) {
     if (
       // Check if the right side of the player is greater than or equal to the left side of the obstacle.
-      player.x + player.width / 2 >= obs.x - obs.width / 2 &&
+      player.x + player.width / 2.3 >= obs.x - obs.width / 2.3 &&
       // Check if the left side of the player is less than or equal to the right side of the obstacle.
-      player.x - player.width / 2 <= obs.x + obs.width / 2 &&
+      player.x - player.width / 2.3 <= obs.x + obs.width / 2.3 &&
       // Check if the bottom side of the player is greater than or equal to the top side of the obstacle.
-      player.y + player.height / 2 >= obs.y - obs.height / 2 &&
+      player.y + player.height / 2.3 >= obs.y - obs.height / 2.3 &&
       // Check if the top side of the player is less than or equal to the bottom side of the obstacle.
-      player.y - player.height / 2 <= obs.y + obs.height / 2
+      player.y - player.height / 2.3 <= obs.y + obs.height / 2.3
     ) {
       // Adjust player position to avoid clipping through the obstacle
-      player.y = obs.y + obs.height / 2 + player.height / 2;
+      player.y = obs.y + obs.height / 2.3 + player.height / 2.3;
       return true; // Collision detected with any obstacle
     }
   }
@@ -252,6 +255,9 @@ function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 function drawScore() {
+  // Increase the player's score based on time
+  score = Math.floor(timer / 60);
+
   ctx.font = "20px 'Press Start 2P', cursive";
   ctx.fillText(`Score: ${score}`, 20, 30);
   ctx.fillStyle = "white";
