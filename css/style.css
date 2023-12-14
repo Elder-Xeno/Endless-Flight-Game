@@ -16,3 +16,8 @@ canvas {
     display: block;
     background: grey;
 }
+
+#gameMenu {
+    position: absolute;
+    z-index: 2; /* controls the stacking order of elements  */
+}

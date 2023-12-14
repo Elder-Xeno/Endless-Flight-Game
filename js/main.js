@@ -3,6 +3,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const gameMenuCanvas = document.getElementById("gameMenu");
+const gameMenuCtx = gameMenuCanvas.getContext("2d");
+
 const player = {
   x: 0, // left and right
   y: canvas.height / 2, // top and bottom
@@ -18,6 +21,7 @@ const obstacleMid = {
   width: 100,
   height: 90,
   color: "blue",
+  speed: 6,
   initialSpeed: 6,
 };
 
@@ -27,6 +31,7 @@ const obstacleTop = {
   width: 120,
   height: 300,
   color: "green",
+  speed: 4,
   initialSpeed: 4,
 };
 
@@ -36,14 +41,19 @@ const obstacleBottom = {
   width: 200,
   height: 230,
   color: "purple",
+  speed: 5,
   initialSpeed: 5,
 };
 
 const obstacles = [obstacleMid, obstacleTop, obstacleBottom];
 
-let score = 0;
+const playButton = {
+  x: gameMenuCanvas.width / 2 - 50,
+  y: gameMenuCanvas.height / 2 - 25,
+  width: 100,
+  height: 50,
+};
 
-let gameOver = false;
 
 // ctx.moveTo(0, 0);
 // ctx.lineTo(801, 601) //account for 1px border for edges
@@ -53,11 +63,13 @@ let gameOver = false;
 
 let movingUp = false;
 let movingDown = false;
-
 let frameCounter = 0; // this will increment once per frame in the game loop to spawn obstacles and control their frequency.
-const spawnFrequency = 30; // Decrease this value to increase the spawn frequency
-
+const spawnFrequency = 10; // Decrease this value to increase the spawn frequency
 let timer = 0; // Variable to track game duration in seconds
+let score = 0;
+let gameStarted = false;
+let startCountdownTimer = 4;
+let gameOver = false;
 
 /*----- cached elements  -----*/
 
@@ -72,8 +84,17 @@ document.addEventListener("keydown", function (evt) {
 document.addEventListener("keyup", function (evt) {
   handleKeyPress(evt.key, false);
 });
-// keypress listener for keys that allow up and down movement for the player.
 
+document.addEventListener("click", function (evt){
+  if (
+    evt.clientX >= playButton.x &&
+    evt.clientX <= playButton.x + playButton.width &&
+    evt.clientY >= playButton.y &&
+    evt.clientY <= playButton.y + playButton.height
+  ) {
+    startGame();
+  }
+});
 
 canvas.addEventListener("click", function (event) {
   if (gameOver) {
@@ -107,7 +128,7 @@ canvas.addEventListener("click", function (event) {
 
 function init() {
   console.log("Game initialized.");
-  render();
+  drawMenu();
 }
 
 function render() {
@@ -124,6 +145,29 @@ function render() {
   } else {
     drawGameOverScreen();
   }
+}
+
+function startGame() {
+  gameMenuCanvas.style.display = "none";
+  gameStarted = true;
+
+  const startCountdownInterval = setInterval(() => {
+    startCountdownTimer--;
+
+    if (startCountdownTimer <= 0) {
+      clearInterval(startCountdownInterval);
+      // Start the actual game after the countdown
+      obstacles.forEach((obs) => {
+        obs.x = canvas.width;
+        obs.speed = obs.initialSpeed;
+      });
+      render();
+    } else {
+      // Redraw the game canvas with updated countdown
+        clearCanvas();
+        drawScore();
+    }
+  }, 1000);
 }
 
 function drawPlayer() {
@@ -153,7 +197,7 @@ function drawObstacle() {
 // Function to update the obstacle's position
 function updateObstacle() {
   obstacles.forEach((obs) => {
-    obs.x -= obs.initialSpeed;
+    obs.x -= obs.speed;
 
     // Reset obstacle position if it goes off the left side of the canvas
     if (obs.x + obs.width / 2 < 0) {
@@ -171,7 +215,7 @@ function updateObstacle() {
       // Check if its time to speed up the game
       if (timer % 120 === 0){
         obstacles.forEach((obs) => {
-          obs.initialSpeed += 1;
+          obs.speed += 1;
         })};
   // Adjust the spawn frequency based on player speed
   const adjustedSpawnFrequency = spawnFrequency * (player.speed / 10);
@@ -201,7 +245,6 @@ function updateObstacle() {
 
   if (checkCollision()) {
     console.log("Collision!");
-    alert("Game Over!");
     // Reset player position
     player.x = 0;
     player.y = canvas.height / 2;
@@ -292,12 +335,18 @@ function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 function drawScore() {
+  if (startCountdownTimer > 0) {
+    ctx.font = "40px 'Press Start 2P', cursive";
+    ctx.fillStyle = "white";
+    ctx.fillText(startCountdownTimer, canvas.width / 2 - 20, canvas.height / 2);
+  } else {
   // Increase the player's score based on time
-  score = Math.floor(timer / 60);
+  score = Math.floor(timer / 10);
 
   ctx.font = "20px 'Press Start 2P', cursive";
   ctx.fillText(`Score: ${score}`, 20, 30);
   ctx.fillStyle = "white";
+}
 }
 
 function drawGameOverScreen() {
@@ -320,33 +369,46 @@ function drawGameOverScreen() {
   ctx.fillText("Restart", canvas.width / 2 - 30, canvas.height / 2 + 55);
 }
 
+function drawMenu(){
+  gameMenuCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
+  gameMenuCtx.fillRect(0, 0, gameMenuCanvas.width, gameMenuCanvas.height);
+
+  gameMenuCtx.fillStyle = "white"
+  gameMenuCtx.fillRect(playButton.x, playButton.y, playButton.width, playButton.height);
+
+  gameMenuCtx.fillStyle = "black";
+  gameMenuCtx.font = "24px 'Press Start 2P', cursive";
+  gameMenuCtx.fillText("Play", playButton.x + 25, playButton.y + 35);
+};
 
 function restartGame(){
   console.log('Restarting game...');
 
-  //show game over screen with restart button
+  const restartCountdownInterval = setInterval(() => {
+    startCountdownTimer--;
 
+    if (startCountdownTimer <= 0) {
+      clearInterval(restartCountdownInterval);
+      player.x = 0;
+      player.y = canvas.height / 2;
 
-  //reset player
-  player.x = 0;
-  player.y = canvas.height / 2;
+      obstacles.forEach((obs) => {
+        obs.x = canvas.width;
+        obs.speed = obs.initialSpeed;
+      });
 
-  //reset obstacles
-  obstacles.forEach((obs)=> {
-    obs.x = canvas.width;
-    obs.speed = obs.initialSpeed;
-  });
-
-  //reset game variables
+  //Reset game variables
   timer = 0;
   score = 0;
   frameCounter = 0;
-
-    // Reset gameOver variable
-    gameOver = false;
-
-  clearCanvas();
+  //Reset gameOver variable
+  gameOver = false;
   render();
+} else {
+  clearCanvas();
+  drawScore();
+}
+}, 1000);
 }
 
 init();
