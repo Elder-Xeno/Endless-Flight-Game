@@ -3,9 +3,6 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const restartContainer = document.getElementById("gameOverScreen");
-const restartButton = document.getElementById("restartButton");
-
 const player = {
   x: 0, // left and right
   y: canvas.height / 2, // top and bottom
@@ -21,7 +18,7 @@ const obstacleMid = {
   width: 100,
   height: 90,
   color: "blue",
-  speed: 6,
+  initialSpeed: 6,
 };
 
 const obstacleTop = {
@@ -30,7 +27,7 @@ const obstacleTop = {
   width: 120,
   height: 300,
   color: "green",
-  speed: 4,
+  initialSpeed: 4,
 };
 
 const obstacleBottom = {
@@ -39,12 +36,14 @@ const obstacleBottom = {
   width: 200,
   height: 230,
   color: "purple",
-  speed: 5,
+  initialSpeed: 5,
 };
 
 const obstacles = [obstacleMid, obstacleTop, obstacleBottom];
 
 let score = 0;
+
+let gameOver = false;
 
 // ctx.moveTo(0, 0);
 // ctx.lineTo(801, 601) //account for 1px border for edges
@@ -62,6 +61,7 @@ let timer = 0; // Variable to track game duration in seconds
 
 /*----- cached elements  -----*/
 
+
 /*----- event listeners -----*/
 
 document.addEventListener("keydown", function (evt) {
@@ -74,8 +74,24 @@ document.addEventListener("keyup", function (evt) {
 });
 // keypress listener for keys that allow up and down movement for the player.
 
-restartButton.addEventListener("click", restartGame);
 
+canvas.addEventListener("click", function (event) {
+  if (gameOver) {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    // Check if the click is within the restart button
+    if (
+      mouseX >= canvas.width / 2 - 60 &&
+      mouseX <= canvas.width / 2 + 60 &&
+      mouseY >= canvas.height / 2 + 30 &&
+      mouseY <= canvas.height / 2 + 70
+    ) {
+      restartGame();
+    }
+  }
+});
 /*----- functions -----*/
 
 // checking the positioning of objects
@@ -96,6 +112,8 @@ function init() {
 
 function render() {
   clearCanvas();
+  
+  if (!gameOver){
   drawPlayer();
   updatePlayer();
   drawObstacle();
@@ -103,6 +121,9 @@ function render() {
   drawScore();
   // method tells the browser that I want to perform an animation. Makes animation smoother.
   requestAnimationFrame(render);
+  } else {
+    drawGameOverScreen();
+  }
 }
 
 function drawPlayer() {
@@ -132,7 +153,7 @@ function drawObstacle() {
 // Function to update the obstacle's position
 function updateObstacle() {
   obstacles.forEach((obs) => {
-    obs.x -= obs.speed;
+    obs.x -= obs.initialSpeed;
 
     // Reset obstacle position if it goes off the left side of the canvas
     if (obs.x + obs.width / 2 < 0) {
@@ -150,7 +171,7 @@ function updateObstacle() {
       // Check if its time to speed up the game
       if (timer % 120 === 0){
         obstacles.forEach((obs) => {
-          obs.speed += 1;
+          obs.initialSpeed += 1;
         })};
   // Adjust the spawn frequency based on player speed
   const adjustedSpawnFrequency = spawnFrequency * (player.speed / 10);
@@ -235,24 +256,35 @@ function updatePlayer() {
 }
 
 function checkCollision() {
-  // Check for collision with the player. /2 to consider half the width or height of each object when comparing
   for (const obs of obstacles) {
+    //The right, left, bottom and top boundaries of the player
+    const playerRight = player.x + player.width / 2.3;
+    const playerLeft = player.x - player.width / 2.3;
+    const playerBottom = player.y + player.height / 2.3;
+    const playerTop = player.y - player.height / 2.3;
+    
+    //The right, left, bottom and top boundary for each obstacle
+    const obsRight = obs.x + obs.width / 2.3;
+    const obsLeft = obs.x - obs.width / 2.3;
+    const obsBottom = obs.y + obs.height / 2.3;
+    const obsTop = obs.y - obs.height / 2.3;
+
+    //compare the coordinates
     if (
-      // Check if the right side of the player is greater than or equal to the left side of the obstacle.
-      player.x + player.width / 2.3 >= obs.x - obs.width / 2.3 &&
-      // Check if the left side of the player is less than or equal to the right side of the obstacle.
-      player.x - player.width / 2.3 <= obs.x + obs.width / 2.3 &&
-      // Check if the bottom side of the player is greater than or equal to the top side of the obstacle.
-      player.y + player.height / 2.3 >= obs.y - obs.height / 2.3 &&
-      // Check if the top side of the player is less than or equal to the bottom side of the obstacle.
-      player.y - player.height / 2.3 <= obs.y + obs.height / 2.3
+      playerRight >= obsLeft &&
+      playerLeft <= obsRight &&
+      playerBottom >= obsTop &&
+      playerTop <= obsBottom
     ) {
-      // Adjust player position to avoid clipping through the obstacle
-      player.y = obs.y + obs.height / 2.3 + player.height / 2.3;
-      return true; // Collision detected with any obstacle
+      // Adjust player position to prevent clipping through the obstacle
+      player.y = obsTop - player.height / 2.3;
+
+      gameOver = true;
+      
+      return true; // Collision detected
     }
   }
-  return false; // No collision with any obstacle
+  return false; // No collision
 }
 
 function clearCanvas() {
@@ -268,9 +300,32 @@ function drawScore() {
   ctx.fillStyle = "white";
 }
 
+function drawGameOverScreen() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "white";
+  ctx.font = "40px 'Press Start 2P', cursive";
+  ctx.fillText("Game Over!", canvas.width / 2 - 120, canvas.height / 2 - 50);
+
+  ctx.font = "20px 'Press Start 2P', cursive";
+  ctx.fillText("Score: " + score, canvas.width / 2 - 50, canvas.height / 2);
+
+  // Draw restart button
+  ctx.fillStyle = "purple";
+  ctx.fillRect(canvas.width / 2 - 60, canvas.height / 2 + 30, 120, 40);
+
+  ctx.fillStyle = "white";
+  ctx.font = "20px 'Press Start 2P', cursive";
+  ctx.fillText("Restart", canvas.width / 2 - 30, canvas.height / 2 + 55);
+}
+
+
 function restartGame(){
+  console.log('Restarting game...');
+
   //show game over screen with restart button
-  gameOverScreen.removeAttribute("hidden");
+
 
   //reset player
   player.x = 0;
@@ -279,13 +334,16 @@ function restartGame(){
   //reset obstacles
   obstacles.forEach((obs)=> {
     obs.x = canvas.width;
-    obs.speed = obstacles.speed;
+    obs.speed = obs.initialSpeed;
   });
 
   //reset game variables
   timer = 0;
   score = 0;
   frameCounter = 0;
+
+    // Reset gameOver variable
+    gameOver = false;
 
   clearCanvas();
   render();
