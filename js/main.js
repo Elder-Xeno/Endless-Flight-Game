@@ -6,6 +6,8 @@ const ctx = canvas.getContext("2d");
 const gameMenuCanvas = document.getElementById("gameMenu");
 const gameMenuCtx = gameMenuCanvas.getContext("2d");
 
+
+
 const player = {
   x: 0, // left and right
   y: canvas.height / 2, // top and bottom
@@ -70,9 +72,9 @@ let score = 0;
 let gameStarted = false;
 let startCountdownTimer = 4;
 let gameOver = false;
+let highScore = localStorage.getItem("highScore") || 0;
 
 /*----- cached elements  -----*/
-
 
 /*----- event listeners -----*/
 
@@ -106,8 +108,8 @@ canvas.addEventListener("click", function (event) {
     if (
       mouseX >= canvas.width / 2 - 60 &&
       mouseX <= canvas.width / 2 + 60 &&
-      mouseY >= canvas.height / 2 + 30 &&
-      mouseY <= canvas.height / 2 + 70
+      mouseY >= canvas.height / 2 + 60 &&
+      mouseY <= canvas.height / 2 + 100
     ) {
       restartGame();
     }
@@ -321,9 +323,7 @@ function checkCollision() {
     ) {
       // Adjust player position to prevent clipping through the obstacle
       player.y = obsTop - player.height / 2.3;
-
       gameOver = true;
-      
       return true; // Collision detected
     }
   }
@@ -358,16 +358,58 @@ function drawGameOverScreen() {
   ctx.fillText("Game Over!", canvas.width / 2 - 120, canvas.height / 2 - 50);
 
   ctx.font = "20px 'Press Start 2P', cursive";
-  ctx.fillText("Score: " + score, canvas.width / 2 - 50, canvas.height / 2);
+  ctx.fillText("Your Score: " + score, canvas.width / 2 - 50, canvas.height / 2 + 10);
+
+  // Display the game over text
+  ctx.fillText("Press 'Restart' to play again", canvas.width / 2 - 130, canvas.height / 2 + 30);
 
   // Draw restart button
   ctx.fillStyle = "purple";
-  ctx.fillRect(canvas.width / 2 - 60, canvas.height / 2 + 30, 120, 40);
+  ctx.fillRect(canvas.width / 2 - 60, canvas.height / 2 + 60, 120, 40);
 
   ctx.fillStyle = "white";
   ctx.font = "20px 'Press Start 2P', cursive";
-  ctx.fillText("Restart", canvas.width / 2 - 30, canvas.height / 2 + 55);
+  ctx.fillText("Restart", canvas.width / 2 - 30, canvas.height / 2 + 85);
+
+   // Display input and button for high score
+   if (score > highScore) {
+    ctx.fillText("Enter your name:", canvas.width / 2 - 80, canvas.height / 2 + 120);
+
+    // Draw input box
+    ctx.fillStyle = "white";
+    ctx.fillRect(canvas.width / 2 - 80, canvas.height / 2 + 140, 160, 20);
+
+    // Draw button
+    ctx.fillStyle = "purple";
+    ctx.fillRect(canvas.width / 2 - 60, canvas.height / 2 + 170, 120, 30);
+
+    ctx.fillStyle = "white";
+    ctx.font = "16px 'Press Start 2P', cursive";
+    ctx.fillText("Submit", canvas.width / 2 - 20, canvas.height / 2 + 188);
+
+    // Handle button click for submitting the player name
+    canvas.addEventListener("click", function (event) {
+      const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+      const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+
+      // Check if the click is within the button bounds
+      if (
+        mouseX >= canvas.width / 2 - 60 &&
+        mouseX <= canvas.width / 2 + 60 &&
+        mouseY >= canvas.height / 2 + 170 &&
+        mouseY <= canvas.height / 2 + 200
+      ) {
+        // Submit player name logic here
+        const playerName = prompt("NEW HIGH SCORE! ENTER YOUR NAME:");
+        highScorePlayer = playerName || "Anonymous";
+        localStorage.setItem("highScore", highScore);
+        localStorage.setItem("highScorePlayer", highScorePlayer);
+        drawGameOverScreen(); // Redraw the game over screen
+      }
+    });
+  }
 }
+
 
 function drawMenu(){
   gameMenuCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
@@ -384,6 +426,8 @@ function drawMenu(){
 function restartGame(){
   console.log('Restarting game...');
 
+  startCountdownTimer = 4;
+  
   const restartCountdownInterval = setInterval(() => {
     startCountdownTimer--;
 
@@ -397,18 +441,46 @@ function restartGame(){
         obs.speed = obs.initialSpeed;
       });
 
-  //Reset game variables
-  timer = 0;
-  score = 0;
-  frameCounter = 0;
-  //Reset gameOver variable
-  gameOver = false;
-  render();
-} else {
-  clearCanvas();
-  drawScore();
+      // Reset game variables
+      timer = 0;
+      score = 0;
+      frameCounter = 0;
+      // Reset gameOver variable
+      gameOver = false;
+      render();
+    } else {
+      clearCanvas();
+      drawScore();
+    }
+  }, 1000);
+
+  // Update high score if the current score is higher
+  if (score > highScore) {
+    highScore = score;
+    drawGameOverScreen();
+
+   // Handle button click for submitting the player name
+    canvas.addEventListener("click", function (event) {
+    const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+  //getBoundingClientRect method returns info about size of an element and it's position relative to the viewport.
+    const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+
+    // Check if the click is within the button bounds
+    if (
+      mouseX >= canvas.width / 2 - 60 &&
+      mouseX <= canvas.width / 2 + 60 &&
+      mouseY >= canvas.height / 2 + 170 &&
+      mouseY <= canvas.height / 2 + 200
+    ) {
+      // Submit player name logic here
+      const playerName = prompt("NEW HIGH SCORE! ENTER YOUR NAME:");
+      highScorePlayer = playerName || "Anonymous";
+      localStorage.setItem("highScore", highScore);
+      localStorage.setItem("highScorePlayer", highScorePlayer);
+      drawGameOverScreen(); // Redraw the game over screen
+    }
+  });
 }
-}, 1000);
 }
 
 init();
