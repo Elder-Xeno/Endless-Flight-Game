@@ -6,6 +6,7 @@ const ctx = canvas.getContext("2d");
 const gameMenuCanvas = document.getElementById("gameMenu");
 const gameMenuCtx = gameMenuCanvas.getContext("2d");
 
+const gameName = "Bat Escape";
 
 
 const player = {
@@ -343,6 +344,10 @@ function drawScore() {
   // Increase the player's score based on time
   score = Math.floor(timer / 10);
 
+  const boxWidth = 120;
+  const boxHeight = 40;
+  ctx.fillStyle = "black";
+  ctx.fillRect(20, 10, boxWidth, boxHeight);
   ctx.font = "20px 'Press Start 2P', cursive";
   ctx.fillText(`Score: ${score}`, 20, 30);
   ctx.fillStyle = "white";
@@ -354,80 +359,52 @@ function drawGameOverScreen() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.fillStyle = "white";
-  ctx.font = "40px 'Press Start 2P', cursive";
+  ctx.font = "50px 'Press Start 2P', cursive";
   ctx.fillText("Game Over!", canvas.width / 2 - 120, canvas.height / 2 - 50);
 
   ctx.font = "20px 'Press Start 2P', cursive";
-  ctx.fillText("Your Score: " + score, canvas.width / 2 - 50, canvas.height / 2 + 10);
-
-  // Display the game over text
-  ctx.fillText("Press 'Restart' to play again", canvas.width / 2 - 130, canvas.height / 2 + 30);
+  if (score > highScore) {
+    ctx.fillText(`New High Score: ${score}`, canvas.width / 2 - 70, canvas.height / 2 + 10);
+    highScore = score;
+    localStorage.setItem("highScore", highScore);
+  } else {
+    ctx.fillText(`Your Score: ${score}`, canvas.width / 2 - 50, canvas.height / 2 + 10);
+  }
 
   // Draw restart button
   ctx.fillStyle = "purple";
-  ctx.fillRect(canvas.width / 2 - 60, canvas.height / 2 + 60, 120, 40);
+  ctx.fillRect(canvas.width / 2 - 45, canvas.height / 2 + 60, 120, 40);
 
   ctx.fillStyle = "white";
   ctx.font = "20px 'Press Start 2P', cursive";
-  ctx.fillText("Restart", canvas.width / 2 - 30, canvas.height / 2 + 85);
-
-   // Display input and button for high score
-   if (score > highScore) {
-    ctx.fillText("Enter your name:", canvas.width / 2 - 80, canvas.height / 2 + 120);
-
-    // Draw input box
-    ctx.fillStyle = "white";
-    ctx.fillRect(canvas.width / 2 - 80, canvas.height / 2 + 140, 160, 20);
-
-    // Draw button
-    ctx.fillStyle = "purple";
-    ctx.fillRect(canvas.width / 2 - 60, canvas.height / 2 + 170, 120, 30);
-
-    ctx.fillStyle = "white";
-    ctx.font = "16px 'Press Start 2P', cursive";
-    ctx.fillText("Submit", canvas.width / 2 - 20, canvas.height / 2 + 188);
-
-    // Handle button click for submitting the player name
-    canvas.addEventListener("click", function (event) {
-      const mouseX = event.clientX - canvas.getBoundingClientRect().left;
-      const mouseY = event.clientY - canvas.getBoundingClientRect().top;
-
-      // Check if the click is within the button bounds
-      if (
-        mouseX >= canvas.width / 2 - 60 &&
-        mouseX <= canvas.width / 2 + 60 &&
-        mouseY >= canvas.height / 2 + 170 &&
-        mouseY <= canvas.height / 2 + 200
-      ) {
-        // Submit player name logic here
-        const playerName = prompt("NEW HIGH SCORE! ENTER YOUR NAME:");
-        highScorePlayer = playerName || "Anonymous";
-        localStorage.setItem("highScore", highScore);
-        localStorage.setItem("highScorePlayer", highScorePlayer);
-        drawGameOverScreen(); // Redraw the game over screen
-      }
-    });
-  }
+  ctx.fillText("Play Again", canvas.width / 2 - 30, canvas.height / 2 + 85);
 }
 
-
-function drawMenu(){
+function drawMenu() {
   gameMenuCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
   gameMenuCtx.fillRect(0, 0, gameMenuCanvas.width, gameMenuCanvas.height);
 
-  gameMenuCtx.fillStyle = "white"
+  // Display game name
+  gameMenuCtx.fillStyle = "white";
+  gameMenuCtx.font = "50px 'Press Start 2P', cursive";
+  gameMenuCtx.fillText(gameName, gameMenuCanvas.width / 2 - 120, 100);
+
+  gameMenuCtx.fillStyle = "white";
   gameMenuCtx.fillRect(playButton.x, playButton.y, playButton.width, playButton.height);
 
   gameMenuCtx.fillStyle = "black";
   gameMenuCtx.font = "24px 'Press Start 2P', cursive";
   gameMenuCtx.fillText("Play", playButton.x + 25, playButton.y + 35);
-};
+
+  // Display highest score
+  gameMenuCtx.fillStyle = "white";
+  gameMenuCtx.font = "20px 'Press Start 2P', cursive";
+  gameMenuCtx.fillText(`Highest Score: ${highScore}`, 20, 30);
+}
 
 function restartGame(){
-  console.log('Restarting game...');
-
   startCountdownTimer = 4;
-  
+
   const restartCountdownInterval = setInterval(() => {
     startCountdownTimer--;
 
@@ -472,7 +449,7 @@ function restartGame(){
       mouseY >= canvas.height / 2 + 170 &&
       mouseY <= canvas.height / 2 + 200
     ) {
-      // Submit player name logic here
+      // Submit player name logic
       const playerName = prompt("NEW HIGH SCORE! ENTER YOUR NAME:");
       highScorePlayer = playerName || "Anonymous";
       localStorage.setItem("highScore", highScore);
