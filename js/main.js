@@ -2,28 +2,26 @@
 // constants of player, obstacles, score counter, game canvas
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-
 const gameMenuCanvas = document.getElementById("gameMenu");
 const gameMenuCtx = gameMenuCanvas.getContext("2d");
-
-const gameName = "Bat Escape";
-
+const gameName = "Box Escape";
+const spawnProbability = 0.6;
 
 const player = {
   x: 0, // left and right
   y: canvas.height / 2, // top and bottom
-  width: 100, // width and height are the size of the player
-  height: 50,
-  color: "red",
+  width: 96, // width and height are the size of the player
+  height: 46,
+  color: "black",
   speed: 10,
 };
 
 const obstacleMid = {
   x: canvas.width,
   y: canvas.height / 2,
-  width: 100,
-  height: 90,
-  color: "blue",
+  width: 96,
+  height: 86,
+  color: "black",
   speed: 6,
   initialSpeed: 6,
 };
@@ -31,9 +29,9 @@ const obstacleMid = {
 const obstacleTop = {
   x: canvas.width,
   y: 100,
-  width: 120,
-  height: 300,
-  color: "green",
+  width: 116,
+  height: 296,
+  color: "black",
   speed: 4,
   initialSpeed: 4,
 };
@@ -41,9 +39,9 @@ const obstacleTop = {
 const obstacleBottom = {
   x: canvas.width,
   y: canvas.height,
-  width: 200,
-  height: 230,
-  color: "purple",
+  width: 196,
+  height: 226,
+  color: "black",
   speed: 5,
   initialSpeed: 5,
 };
@@ -57,7 +55,6 @@ const playButton = {
   height: 50,
 };
 
-
 // ctx.moveTo(0, 0);
 // ctx.lineTo(801, 601) //account for 1px border for edges
 // ctx.stroke();
@@ -67,7 +64,7 @@ const playButton = {
 let movingUp = false;
 let movingDown = false;
 let frameCounter = 0; // this will increment once per frame in the game loop to spawn obstacles and control their frequency.
-const spawnFrequency = 10; // Decrease this value to increase the spawn frequency
+const spawnFrequency = 5; // Decrease this value to increase the spawn frequency
 let timer = 0; // Variable to track game duration in seconds
 let score = 0;
 let gameStarted = false;
@@ -88,7 +85,7 @@ document.addEventListener("keyup", function (evt) {
   handleKeyPress(evt.key, false);
 });
 
-document.addEventListener("click", function (evt){
+document.addEventListener("click", function (evt) {
   if (
     evt.clientX >= playButton.x &&
     evt.clientX <= playButton.x + playButton.width &&
@@ -136,15 +133,15 @@ function init() {
 
 function render() {
   clearCanvas();
-  
-  if (!gameOver){
-  drawPlayer();
-  updatePlayer();
-  drawObstacle();
-  updateObstacle();
-  drawScore();
-  // method tells the browser that I want to perform an animation. Makes animation smoother.
-  requestAnimationFrame(render);
+
+  if (!gameOver) {
+    drawPlayer();
+    updatePlayer();
+    drawObstacle();
+    updateObstacle();
+    drawScore();
+    // method tells the browser that I want to perform an animation. Makes animation smoother.
+    requestAnimationFrame(render);
   } else {
     drawGameOverScreen();
   }
@@ -167,75 +164,80 @@ function startGame() {
       render();
     } else {
       // Redraw the game canvas with updated countdown
-        clearCanvas();
-        drawScore();
+      clearCanvas();
+      drawScore();
     }
   }, 1000);
 }
 
 function drawPlayer() {
-  clearCanvas();
-  // Draw the player on the canvas
   ctx.fillStyle = player.color;
+  ctx.strokeStyle = "rgb(83,254,17)";
+  ctx.lineWidth = 2;
   ctx.fillRect(
     player.x - player.width / 2,
     player.y - player.height / 2,
     player.width,
     player.height
-  );
+    );
+    ctx.strokeRect(
+      player.x - player.width / 2,
+      player.y - player.height / 2,
+      player.width,
+      player.height
+    );
 }
 
 function drawObstacle() {
   obstacles.forEach((obs) => {
     ctx.fillStyle = obs.color;
+    ctx.strokeStyle = "rgb(254,188,20)";
+    ctx.lineWidth = 2;
     ctx.fillRect(
       obs.x - obs.width / 2,
       obs.y - obs.height / 2,
       obs.width,
       obs.height
+      );
+      ctx.strokeRect(
+        obs.x - obs.width / 2,
+        obs.y - obs.height / 2,
+        obs.width,
+        obs.height
     );
   });
 }
 
-// Function to update the obstacle's position
 function updateObstacle() {
   obstacles.forEach((obs) => {
     obs.x -= obs.speed;
-
-    // Reset obstacle position if it goes off the left side of the canvas
-    if (obs.x + obs.width / 2 < 0) {
+    if (obs.x + obs.width / 2 < 0) { // Reset obstacle position if obs go off left
       obs.x = canvas.width + obs.width / 2;
-      // Adjusts the height at which the obstacle will respawn
       obs.y = getRandomPosition(obs);
-      
     }
   });
-
-  // Increase the frame counter
   frameCounter++;
   timer++;
-
-      // Check if its time to speed up the game
-      if (timer % 120 === 0){
-        obstacles.forEach((obs) => {
-          obs.speed += 1;
-        })};
-  // Adjust the spawn frequency based on player speed
-  const adjustedSpawnFrequency = spawnFrequency * (player.speed / 10);
+  if (timer % 120 === 0) { // Check if its time to speed up the game
+    obstacles.forEach((obs) => {
+      obs.speed += 1;
+    });
+  }
+  const adjustedSpawnFrequency = //calculates average speed of obstacles and adjusts spawn frequency based on total
+    spawnFrequency *
+    (obstacles.reduce((sum, obs) => sum + obs.speed, 0) /
+      (10 * obstacles.length));
 
   // Spawn a new obstacle every spawnFrequency frame
   if (frameCounter % adjustedSpawnFrequency === 0) {
-    console.log("Spawning obstacles!");
-    for (let i = 0; i < 5; i++) {
-      //spawn 5 obstacles at once
+
+    for (let i = 0; i < 2; i++) {
       const randomObstacle = Math.floor(Math.random() * obstacles.length);
       const newObstacle = {
         ...obstacles[randomObstacle],
-        x: canvas.width, //Set the x coordinate of the new obstacle to the right edge of the canvas
+        x: canvas.width,
         y: getRandomPosition(obstacles[randomObstacle]),
       };
-
-      // Check if there is enough space between new obstacle and existing obstacles
       if (checkSpace(newObstacle, 100)) {
         obstacles.push(newObstacle);
       }
@@ -266,7 +268,7 @@ function getRandomPosition(obstacle) {
   } else if (obstacle === obstacleMid) {
     return (
       canvas.height / 3 + Math.random() * (canvas.height / 2 - obstacle.height)
-    )
+    );
   } else if (obstacle === obstacleBottom) {
     return canvas.height;
   }
@@ -308,7 +310,7 @@ function checkCollision() {
     const playerLeft = player.x - player.width / 2.3;
     const playerBottom = player.y + player.height / 2.3;
     const playerTop = player.y - player.height / 2.3;
-    
+
     //The right, left, bottom and top boundary for each obstacle
     const obsRight = obs.x + obs.width / 2.3;
     const obsLeft = obs.x - obs.width / 2.3;
@@ -335,23 +337,26 @@ function clearCanvas() {
   // Clear the canvas using method clearRect() Updates player position
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
+
 function drawScore() {
   if (startCountdownTimer > 0) {
     ctx.font = "40px 'Press Start 2P', cursive";
     ctx.fillStyle = "white";
     ctx.fillText(startCountdownTimer, canvas.width / 2 - 20, canvas.height / 2);
   } else {
-  // Increase the player's score based on time
-  score = Math.floor(timer / 10);
+    score = Math.floor(timer / 10);// Increase the player's score based on time
 
-  const boxWidth = 120;
-  const boxHeight = 40;
-  ctx.fillStyle = "black";
-  ctx.fillRect(20, 10, boxWidth, boxHeight);
-  ctx.font = "20px 'Press Start 2P', cursive";
-  ctx.fillText(`Score: ${score}`, 20, 30);
-  ctx.fillStyle = "white";
-}
+    // Draw the black box
+    const boxWidth = 120;
+    const boxHeight = 40;
+    ctx.fillStyle = "black";
+    ctx.fillRect(10, 10, boxWidth, boxHeight);
+
+    // Draw the score text
+    ctx.fillStyle = "white";
+    ctx.font = "20px 'Press Start 2P', cursive";
+    ctx.fillText(`Score: ${score}`, 20, 30);
+  }
 }
 
 function drawGameOverScreen() {
@@ -364,11 +369,19 @@ function drawGameOverScreen() {
 
   ctx.font = "20px 'Press Start 2P', cursive";
   if (score > highScore) {
-    ctx.fillText(`New High Score: ${score}`, canvas.width / 2 - 70, canvas.height / 2 + 10);
+    ctx.fillText(
+      `New High Score: ${score}`,
+      canvas.width / 2 - 70,
+      canvas.height / 2 + 10
+    );
     highScore = score;
     localStorage.setItem("highScore", highScore);
   } else {
-    ctx.fillText(`Your Score: ${score}`, canvas.width / 2 - 50, canvas.height / 2 + 10);
+    ctx.fillText(
+      `Your Score: ${score}`,
+      canvas.width / 2 - 50,
+      canvas.height / 2 + 10
+    );
   }
 
   // Draw restart button
@@ -390,19 +403,23 @@ function drawMenu() {
   gameMenuCtx.fillText(gameName, gameMenuCanvas.width / 2 - 120, 100);
 
   gameMenuCtx.fillStyle = "white";
-  gameMenuCtx.fillRect(playButton.x, playButton.y, playButton.width, playButton.height);
+  gameMenuCtx.fillRect(
+    playButton.x,
+    playButton.y,
+    playButton.width,
+    playButton.height
+  );
 
-  gameMenuCtx.fillStyle = "black";
+  gameMenuCtx.fillStyle = "black"; //Play button
   gameMenuCtx.font = "24px 'Press Start 2P', cursive";
   gameMenuCtx.fillText("Play", playButton.x + 25, playButton.y + 35);
 
-  // Display highest score
-  gameMenuCtx.fillStyle = "white";
+  gameMenuCtx.fillStyle = "white"; // Display high score
   gameMenuCtx.font = "20px 'Press Start 2P', cursive";
   gameMenuCtx.fillText(`Highest Score: ${highScore}`, 20, 30);
 }
 
-function restartGame(){
+function restartGame() {
   startCountdownTimer = 4;
 
   const restartCountdownInterval = setInterval(() => {
@@ -435,29 +452,9 @@ function restartGame(){
   if (score > highScore) {
     highScore = score;
     drawGameOverScreen();
-
-   // Handle button click for submitting the player name
-    canvas.addEventListener("click", function (event) {
-    const mouseX = event.clientX - canvas.getBoundingClientRect().left;
-  //getBoundingClientRect method returns info about size of an element and it's position relative to the viewport.
-    const mouseY = event.clientY - canvas.getBoundingClientRect().top;
-
-    // Check if the click is within the button bounds
-    if (
-      mouseX >= canvas.width / 2 - 60 &&
-      mouseX <= canvas.width / 2 + 60 &&
-      mouseY >= canvas.height / 2 + 170 &&
-      mouseY <= canvas.height / 2 + 200
-    ) {
-      // Submit player name logic
-      const playerName = prompt("NEW HIGH SCORE! ENTER YOUR NAME:");
-      highScorePlayer = playerName || "Anonymous";
-      localStorage.setItem("highScore", highScore);
-      localStorage.setItem("highScorePlayer", highScorePlayer);
-      drawGameOverScreen(); // Redraw the game over screen
-    }
-  });
-}
+    localStorage.setItem("highScore", highScore);
+    drawGameOverScreen(); // Redraw the game over screen
+  }
 }
 
 init();

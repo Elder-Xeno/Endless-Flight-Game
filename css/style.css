@@ -1,23 +1,30 @@
 body {
-    margin: 0;
-    background: whitesmoke;
-    overflow: hidden;
+  margin: 0;
+  background: whitesmoke;
+  overflow: hidden;
 }
 
 #gameContainer {
-    display: flex;
-    align-items:start;
-    justify-content: start;
-    height: 100vh;
-    position: relative;
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  height: 100vh;
+  position: relative;
 }
 
 canvas {
-    display: block;
-    background: grey;
+    justify-content: center;
+    align-items: center;
+  background: url("/assets/game-background.jpg");
+  background-size: cover;
 }
 
 #gameMenu {
-    position: absolute;
-    z-index: 2; /* controls the stacking order of elements  */
+  position: absolute;
+  z-index: 2; /* controls the stacking order of elements  */
+  background-image: url("/assets/start-background.png");
+  background-size: cover;
+  justify-content: center;
+  align-items: center;
+
 }
