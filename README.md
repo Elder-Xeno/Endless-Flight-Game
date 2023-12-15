@@ -2,7 +2,7 @@
 
 ## Description
 
-##Square Escape is a simple 2D game where you control a flying character up and down, while trying to avoid obstacles in order to achieve a high score.
+## Square Escape is a simple 2D game where you control a flying character up and down, while trying to avoid obstacles in order to achieve a high score.
 The game is similar to Flappy Bird but instead of physics to keep the player afloat, the game requires simple up and down (or the option of W and D) key presses for movement.
 
 ## Screenshot(s)
