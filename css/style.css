@@ -15,16 +15,15 @@ body {
 canvas {
     justify-content: center;
     align-items: center;
-  background: url("/assets/game-background.jpg");
+  background: url("./assets/game-background.jpg");
   background-size: cover;
 }
 
 #gameMenu {
   position: absolute;
   z-index: 2; /* controls the stacking order of elements  */
-  background-image: url("/assets/start-background.png");
+  background-image: url("./assets/start-background.png");
   background-size: cover;
   justify-content: center;
   align-items: center;
-
 }
