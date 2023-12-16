@@ -4,7 +4,6 @@ const ctx = canvas.getContext("2d");
 const gameMenuCanvas = document.getElementById("gameMenu");
 const gameMenuCtx = gameMenuCanvas.getContext("2d");
 const gameName = "Square Escape";
-const spawnProbability = 0.6;
 
 const player = {
   x: 0,
@@ -159,13 +158,13 @@ function drawPlayer() {
     player.y - player.height / 2,
     player.width,
     player.height
-    );
-    ctx.strokeRect(
-      player.x - player.width / 2,
-      player.y - player.height / 2,
-      player.width,
-      player.height
-    );
+  );
+  ctx.strokeRect(
+    player.x - player.width / 2,
+    player.y - player.height / 2,
+    player.width,
+    player.height
+  );
 }
 
 function drawObstacle() {
@@ -178,12 +177,12 @@ function drawObstacle() {
       obs.y - obs.height / 2,
       obs.width,
       obs.height
-      );
-      ctx.strokeRect(
-        obs.x - obs.width / 2,
-        obs.y - obs.height / 2,
-        obs.width,
-        obs.height
+    );
+    ctx.strokeRect(
+      obs.x - obs.width / 2,
+      obs.y - obs.height / 2,
+      obs.width,
+      obs.height
     );
   });
 }
@@ -209,7 +208,6 @@ function updateObstacle() {
       (10 * obstacles.length));
 
   if (frameCounter % adjustedSpawnFrequency === 0) {
-
     for (let i = 0; i < 2; i++) {
       const randomObstacle = Math.floor(Math.random() * obstacles.length);
       const newObstacle = {
@@ -359,7 +357,6 @@ function drawGameOverScreen() {
 function drawMenu() {
   gameMenuCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
   gameMenuCtx.fillRect(0, 0, gameMenuCanvas.width, gameMenuCanvas.height);
-
 
   gameMenuCtx.fillStyle = "white";
   gameMenuCtx.font = "70px 'Press Start 2P', cursive";
