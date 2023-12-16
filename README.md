@@ -2,8 +2,9 @@
 
 ## Description
 
-## Square Escape is a simple 2D game where you control a flying character up and down, while trying to avoid obstacles in order to achieve a high score.
-The game is similar to Flappy Bird but instead of physics to keep the player afloat, the game requires simple up and down (or the option of W and D) key presses for movement.
+## Square Escape is a simple 2D game where you control a character using up and down movement, while trying to avoid obstacles in order to achieve a high score.
+The game is similar to Flappy Bird, but instead of physics to keep the player afloat, the game only requires the use of simple up and down (or the option of W and D) key presses.
+Square Escape was made as an easy to pick up and play game, for people of all ages.
 
 ## Screenshot(s)
 
@@ -18,6 +19,16 @@ The game is similar to Flappy Bird but instead of physics to keep the player afl
 - **JavaScript**
 - **Canvas API**
 
-Getting Started: Avoid Obstacles by using W and D, or upArrow and downArrow keys to control the player character.
+## Getting Started
 
-Next Steps: Planned future enhancements (icebox items).
+Avoid Obstacles by using W and D, or upArrow and downArrow keys to control the player character.
+
+## Check out my game
+
+https://elder-xeno.github.io/Endless-Flight-Game/
+
+## Next Steps
+
+I would like to change the obstacles, player and theme, maybe rewrite the game using something other than canvas.
+I also plan to add animation for collision, maybe some sound effects and music.
+
